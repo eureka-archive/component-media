@@ -1,0 +1,21 @@
+{
+  "name": "eureka/component-media",
+  "description": "PHP Media library.",
+  "type": "library",
+  "license": "MIT",
+
+  "authors": [
+    {
+      "name": "Romain Cottard",
+      "role": "Developer"
+    }
+
+  ],
+
+  "autoload": {
+    "psr-4": {
+      "Eureka\\Component\\Media\\": "./src/Media/"
+    }
+  },
+
+}
