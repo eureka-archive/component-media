@@ -16,6 +16,6 @@
     "psr-4": {
       "Eureka\\Component\\Media\\": "./src/Media/"
     }
-  },
+  }
 
 }
