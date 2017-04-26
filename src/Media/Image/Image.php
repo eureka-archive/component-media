@@ -290,6 +290,61 @@ class Image
     }
 
     /**
+     * Crop image if necessary.
+     *
+     * @return $this
+     * @throws ImageException
+     */
+    public function crop($maxWidth, $maxHeight)
+    {
+        if (!is_resource($this->image)) {
+            $this->open();
+        }
+
+        //~ Width & height are already under bound, don't crop the original image
+        if ($this->width <= $maxWidth && $this->height <= $maxHeight) {
+            return $this;
+        }
+
+        //~ Get max width/height for the cropped image
+        $data         = new \stdClass();
+        $data->width  = min($this->width, $maxWidth);
+        $data->height = min($this->height, $maxHeight);
+
+        //~ Get origin x/y from the original image where the crop start
+        $data->y = $data->x = 0;
+
+        if ($this->width  > $maxWidth) {
+            $data->x = floor(abs($this->width - $maxWidth) / 2);
+        }
+
+        if ($this->height > $maxHeight) {
+            $data->y = floor(abs($this->height - $maxHeight) / 2);
+        }
+
+        //~ Create new resource image
+        $image = imagecreatetruecolor($data->width, $data->height);
+
+        if (!is_resource($image)) {
+            throw new Exception\ImageException(__METHOD__ . '|Unable to create new resource image !');
+        }
+
+        //~ Copy
+        if (!imagecopy($image, $this->image, 0, 0, $data->x, $data->y, $data->width, $data->height)) {
+            throw new Exception\ImageException(__METHOD__ . '|Unable to copy cropped image resource into new image resource !');
+        }
+
+        //~ Remove original image resource & use croped image resource as original image resource
+        imagedestroy($this->image);
+        $this->image = $image;
+
+        $this->width  = $data->width;
+        $this->height = $data->height;
+
+        return $this;
+    }
+
+    /**
      * Set image into square format if necessary
      *
      * @return $this
@@ -334,6 +389,9 @@ class Image
         //~ Remove original image resource & use croped image resource as original image resource
         imagedestroy($this->image);
         $this->image = $image;
+
+        $this->width  = $data->width;
+        $this->height = $data->height;
 
         return $this;
     }
@@ -399,7 +457,40 @@ class Image
         imagedestroy($this->image);
         $this->image = $image;
 
+        $this->width  = $width;
+        $this->height = $height;
+
         return $this;
+    }
+
+    /**
+     * Resize image based on new width (keep ratio)
+     *
+     * @param  int $width
+     * @return $this
+     * @throws ImageException
+     */
+    public function resizeOnWidth($width)
+    {
+        $width  = (int) $width;
+        $height = (int) $this->height / ($this->width / $width);
+
+        $this->resize($width, $height, true);
+    }
+
+    /**
+     * Resize image base on new height (keep ratio).
+     *
+     * @param  int $height
+     * @return $this
+     * @throws ImageException
+     */
+    public function resizeOnHeight($height)
+    {
+        $width  = (int) $this->width / ($this->height / $height);
+        $height = (int) $height;
+
+        $this->resize($width, $height, true);
     }
 
     /**
