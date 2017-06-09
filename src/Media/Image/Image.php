@@ -518,12 +518,15 @@ class Image
      * Save image into png format to the specified path.
      *
      * @param  string  $filePathname
-     * @param  integer $quality Compression rate, from 0 (no compression) to 9
+     * @param  integer $quality 0 to 100 (in percent)
      * @return $this New instance for the saved image.
      * @throws Exception\ImageException
      */
-    public function saveAsPng($filePathname, $quality = 0)
+    public function saveAsPng($filePathname, $quality = 100)
     {
+        //~ Convert percent quality to 0-9 compression value
+        $compression = abs(ceil($quality / 10) - 10);
+
         if (!is_resource($this->image)) {
             $this->open();
         }
@@ -533,7 +536,7 @@ class Image
         // Required to save transparency
         imagesavealpha($this->image, true);
 
-        if (!imagepng($this->image, $filePathname, $quality)) {
+        if (!imagepng($this->image, $filePathname, $compression)) {
             throw new Exception\ImageException(__METHOD__ . '|Unable to save the image into png format !');
         }
 
@@ -545,10 +548,11 @@ class Image
      *
      * @param  string  $path
      * @param  integer $format (Use IMAGETYPE_XXX constant from PHP)
+     * @param  integer $quality
      * @return $this
      * @throws Exception\ImageException
      */
-    public function saveForCdn($path, $format = IMAGETYPE_JPEG)
+    public function saveForCdn($path, $format = IMAGETYPE_JPEG, $quality = 100)
     {
         $path = rtrim($path, '/');
         //~ Tmp file
@@ -557,11 +561,11 @@ class Image
         switch ($format) {
             //
             case IMAGETYPE_JPEG:
-                $image     = $this->saveAsJpeg($filePathnameTmp);
+                $image     = $this->saveAsJpeg($filePathnameTmp, $quality);
                 break;
             //
             case IMAGETYPE_PNG:
-                $image     = $this->saveAsPng($filePathnameTmp);
+                $image     = $this->saveAsPng($filePathnameTmp, $quality);
                 break;
             //
             default:
