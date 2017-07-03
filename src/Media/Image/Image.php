@@ -81,6 +81,24 @@ class Image
     }
 
     /**
+     * Display image.
+     *
+     * @return void
+     */
+    public function display()
+    {
+        if (!is_resource($this->image)) {
+            $this->open();
+        }
+
+        //~ Set header jpeg
+        header('Content-Type: image/jpeg');
+
+        //~ Display the image
+        imagejpeg($this->image);
+    }
+
+    /**
      * Set file pathname
      *
      * @param  string $filePathname
