@@ -85,14 +85,16 @@ class Image
      *
      * @return void
      */
-    public function display()
+    public function display($withHeader = true)
     {
         if (!is_resource($this->image)) {
             $this->open();
         }
 
         //~ Set header jpeg
-        header('Content-Type: image/jpeg');
+        if ($withHeader) {
+            header('Content-Type: image/jpeg');
+        }
 
         //~ Display the image
         imagejpeg($this->image);
@@ -570,7 +572,7 @@ class Image
      * @return $this
      * @throws Exception\ImageException
      */
-    public function saveForCdn($path, $format = IMAGETYPE_JPEG, $quality = 100)
+    public function saveForCdn($path, $format = IMAGETYPE_JPEG, $quality = 100, $fileSuffix = '', $filePrefix = '')
     {
         $path = rtrim($path, '/');
         //~ Tmp file
@@ -595,7 +597,7 @@ class Image
         $extension       = '.' . self::EXTENSION_BY_TYPE[$format];
         $md5             = $image->getFileMd5();
         $subpath         = '/' . $md5{0} . '/' . $md5{1} . '/' . $md5{2};
-        $filePathnameNew = $path . $subpath . '/' . $md5 . $extension;
+        $filePathnameNew = $path . $subpath . '/' . $filePrefix . $md5 . $fileSuffix . $extension;
 
         //~ Move file into final place
         if (!rename($image->getFilePathname(), $filePathnameNew)) {

@@ -81,6 +81,16 @@ class ImageLink
     }
 
     /**
+     * Get uri for the given image.
+     *
+     * @return string
+     */
+    public function getUriThumbnail($width, $height)
+    {
+        return $this->baseUri . '/' . $width . '/' . $height . '/' . $this->getFilename();
+    }
+
+    /**
      * Get filename given image.
      *
      * @return string
