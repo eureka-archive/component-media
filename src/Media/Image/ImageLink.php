@@ -16,44 +16,25 @@ namespace Eureka\Component\Media\Image;
  */
 class ImageLink
 {
-    /**
-     * @var string EXT_JPEG jpeg extension.
-     */
+    /** @var string EXT_JPEG jpeg extension. */
     const EXT_JPEG = 'jpeg';
 
-    /**
-     * @var string EXT_JPG jpg extension (without 'e')
-     */
+    /** @var string EXT_JPG jpg extension (without 'e') */
     const EXT_JPG = 'jpg';
 
-    /**
-     * @var string EXT_GIF gif extension
-     */
+    /** @var string EXT_GIF gif extension */
     const EXT_GIF = 'gif';
 
-    /**
-     * @var string EXT_PNG png extension
-     */
+    /** @var string EXT_PNG png extension */
     const EXT_PNG = 'png';
 
-    /**
-     * @var string $baseUri Base uri of the image
-     */
+    /** @var string $baseUri Base uri of the image */
     private $baseUri = '';
 
-    /**
-     * @var string $path
-     */
-    private $path = '';
-
-    /**
-     * @var string $md5 MD5 hash of the image.
-     */
+    /** @var string $md5 MD5 hash of the image. */
     private $md5 = '';
 
-    /**
-     * @var string $extension Extension file for the image.
-     */
+    /** @var string $extension Extension file for the image. */
     private $extension = 'jpg';
 
     /**
@@ -77,12 +58,14 @@ class ImageLink
      */
     public function getUri()
     {
-        return $this->baseUri . $this->getSubpath() . $this->getFilename();
+        return $this->baseUri . $this->getSubPath() . $this->getFilename();
     }
 
     /**
      * Get uri for the given image.
      *
+     * @param int $width
+     * @param int $height
      * @return string
      */
     public function getUriThumbnail($width, $height)
@@ -101,11 +84,11 @@ class ImageLink
     }
 
     /**
-     * Get subpath for the given image.
+     * Get sub path for the given image.
      *
      * @return string
      */
-    public function getSubpath()
+    public function getSubPath()
     {
         return '/' . $this->md5{0} . '/' . $this->md5{1} . '/' . $this->md5{2} . '/';
     }
@@ -114,7 +97,9 @@ class ImageLink
      * Set extension.
      *
      * @param  string $extension
-     * @return self
+     * @return $this
+     * @throws \InvalidArgumentException
+     * @throws \DomainException
      */
     public function setExtension($extension)
     {
@@ -142,7 +127,8 @@ class ImageLink
      * Set MD5 hash.
      *
      * @param  string $md5
-     * @return self
+     * @return $this
+     * @throws \InvalidArgumentException
      */
     public function setMd5($md5)
     {
@@ -164,7 +150,8 @@ class ImageLink
      * Set base uri.
      *
      * @param  string $baseUri
-     * @return self
+     * @return $this
+     * @throws \InvalidArgumentException
      */
     public function setBaseUri($baseUri)
     {

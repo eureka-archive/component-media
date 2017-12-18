@@ -1,7 +1,7 @@
 <?php
 
-/**
- * Copyright (c) 2010-2017 Romain Cottard
+/*
+ * Copyright (c) Romain Cottard
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -9,13 +9,12 @@
 
 namespace Eureka\Component\Media\Image;
 
-use Eureka\Component\Media\Image\Exception\EmptyFileException;
 use Eureka\Component\Media\Image\Exception\ImageException;
 
 /**
  * Class to manipulate image with gd extension.
  *
- * @author  Romain Cottard
+ * @author Romain Cottard
  */
 class Image
 {
@@ -25,45 +24,34 @@ class Image
         IMAGETYPE_PNG => 'png',
     ];
 
-    /**
-     * @var string $filePathname File Pathname of the image.
-     */
+    /** @var string $filePathname File Pathname of the image. */
     protected $filePathname = '';
 
-    /**
-     * @var integer $width image width
-     */
+    /** @var int $width image width */
     protected $width = 0;
 
-    /**
-     * @var integer $height image height
-     */
+    /** @var int $height image height */
     protected $height = 0;
 
-    /**
-     * @var integer $type image type
-     */
+    /** @var int $type image type */
     protected $type = 0;
 
-    /**
-     * @var string $mimeType image mime type
-     */
+    /** @var string $mimeType image mime type */
     protected $mimeType = '';
 
-    /**
-     * @var resource $image Resource of the image opened with gd functions.
-     */
+    /** @var resource $image Resource of the image opened with gd functions. */
     protected $image = null;
 
-    /**
-     * @var string $extension
-     */
+    /** @var string $extension */
     protected $extension = '';
 
     /**
      * imagegd constructor.
      *
-     * @param string $filePathname
+     * @param  string $filePathname
+     * @throws \Eureka\Component\Media\Image\Exception\EmptyFileException
+     * @throws \Eureka\Component\Media\Image\Exception\FileNotExistsException
+     * @throws \Eureka\Component\Media\Image\Exception\ImageException
      */
     public function __construct($filePathname)
     {
@@ -83,6 +71,7 @@ class Image
     /**
      * Display image.
      *
+     * @param  bool $withHeader
      * @return void
      */
     public function display($withHeader = true)
@@ -105,8 +94,8 @@ class Image
      *
      * @param  string $filePathname
      * @return $this
-     * @throws Runtime\EmptyValueException
-     * @throws Runtime\EntityNotExistsException
+     * @throws \Eureka\Component\Media\Image\Exception\EmptyFileException
+     * @throws \Eureka\Component\Media\Image\Exception\FileNotExistsException
      */
     protected function setFilePathname($filePathname)
     {
@@ -162,7 +151,7 @@ class Image
      * Get MD5 of the file content.
      *
      * @return string
-     * @throws Runtime\UnexpectedValueException
+     * @throws \Eureka\Component\Media\Image\Exception\ImageException
      */
     public function getFileMd5()
     {
@@ -236,12 +225,10 @@ class Image
     }
 
     /**
-     * Initialise image informations
+     * Initialise image information.
      *
      * @return $this
-     * @throws Runtime\EmptyValueException
-     * @throws Runtime\RuntimeException
-     * @throws ImageException
+     * @throws \Eureka\Component\Media\Image\Exception\ImageException
      */
     protected function init()
     {
@@ -272,7 +259,7 @@ class Image
      *
      * @return $this
      * @throws ImageException
-     * @throws Logic\DomainException
+     * @throws \Eureka\Component\Media\Image\Exception\ImageException
      */
     protected function open()
     {
@@ -312,8 +299,10 @@ class Image
     /**
      * Crop image if necessary.
      *
+     * @param  int $maxWidth
+     * @param  int $maxHeight
      * @return $this
-     * @throws ImageException
+     * @throws \Eureka\Component\Media\Image\Exception\ImageException
      */
     public function crop($maxWidth, $maxHeight)
     {
@@ -354,7 +343,7 @@ class Image
             throw new Exception\ImageException(__METHOD__ . '|Unable to copy cropped image resource into new image resource !');
         }
 
-        //~ Remove original image resource & use croped image resource as original image resource
+        //~ Remove original image resource & use cropped image resource as original image resource
         imagedestroy($this->image);
         $this->image = $image;
 
@@ -406,7 +395,7 @@ class Image
             throw new Exception\ImageException(__METHOD__ . '|Unable to copy cropped image resource into new image resource !');
         }
 
-        //~ Remove original image resource & use croped image resource as original image resource
+        //~ Remove original image resource & use cropped image resource as original image resource
         imagedestroy($this->image);
         $this->image = $image;
 
@@ -468,12 +457,12 @@ class Image
             throw new Exception\ImageException(__METHOD__ . '|Unable to create new resource image !');
         }
 
-        //~ Resampled in new resource
+        //~ Re-sampled in new resource
         if (!imagecopyresampled($image, $this->image, 0, 0, 0, 0, $width, $height, $this->width, $this->height)) {
             throw new Exception\ImageException(__METHOD__ . '|Unable to resize the image !');
         }
 
-        //~ Remove original image resource & use croped image resource as original image resource
+        //~ Remove original image resource & use cropped image resource as original image resource
         imagedestroy($this->image);
         $this->image = $image;
 
@@ -496,6 +485,8 @@ class Image
         $height = (int) $this->height / ($this->width / $width);
 
         $this->resize($width, $height, true);
+
+        return $this;
     }
 
     /**
@@ -511,13 +502,15 @@ class Image
         $height = (int) $height;
 
         $this->resize($width, $height, true);
+
+        return $this;
     }
 
     /**
      * Save image into jpeg format to the specified path.
      *
      * @param  string  $filePathname
-     * @param  integer $quality
+     * @param  int $quality
      * @return $this New instance for the saved image.
      * @throws Exception\ImageException
      */
@@ -538,7 +531,7 @@ class Image
      * Save image into png format to the specified path.
      *
      * @param  string  $filePathname
-     * @param  integer $quality 0 to 100 (in percent)
+     * @param  int $quality 0 to 100 (in percent)
      * @return $this New instance for the saved image.
      * @throws Exception\ImageException
      */
@@ -567,10 +560,12 @@ class Image
      * Save image into specified format on into the path for cdn content.
      *
      * @param  string  $path
-     * @param  integer $format (Use IMAGETYPE_XXX constant from PHP)
-     * @param  integer $quality
+     * @param  int $format (Use IMAGETYPE_XXX constant from PHP)
+     * @param  int $quality
+     * @param  string $fileSuffix
+     * @param  string $filePrefix
      * @return $this
-     * @throws Exception\ImageException
+     * @throws \Eureka\Component\Media\Image\Exception\ImageException
      */
     public function saveForCdn($path, $format = IMAGETYPE_JPEG, $quality = 100, $fileSuffix = '', $filePrefix = '')
     {
@@ -589,20 +584,20 @@ class Image
                 break;
             //
             default:
-                throw new \DomainException(__METHOD__ . '|Output format is not supported !');
+                throw new Exception\ImageException(__METHOD__ . '|Output format is not supported !');
 
         }
 
         //~ Generate final file pathname
         $extension       = '.' . self::EXTENSION_BY_TYPE[$format];
         $md5             = $image->getFileMd5();
-        $subpath         = '/' . $md5{0} . '/' . $md5{1} . '/' . $md5{2};
-        $filePathnameNew = $path . $subpath . '/' . $filePrefix . $md5 . $fileSuffix . $extension;
+        $subPath         = '/' . $md5{0} . '/' . $md5{1} . '/' . $md5{2};
+        $filePathnameNew = $path . $subPath . '/' . $filePrefix . $md5 . $fileSuffix . $extension;
 
         //~ Move file into final place
         if (!rename($image->getFilePathname(), $filePathnameNew)) {
             unset($image);
-            throw new Exception\ImageException(__METHOD__ . '|Unable to move tmp file final destination (dest: "' . $filePathnameNew . '")');
+            throw new Exception\ImageException(__METHOD__ . '|Unable to move tmp file final destination (destination: "' . $filePathnameNew . '")');
         }
 
         //~ Destroy tmp image
