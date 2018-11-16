@@ -428,30 +428,18 @@ class Image
             return $this;
         }
 
-        if ($keepRatio) {
-
-            $calcHeight = $this->height / ($this->width / $width);
-            $calcWidth  = $this->width / ($this->height / $height);
-
-            if ($this->isLandscape()) {
-
-                if ($calcHeight < $height) {
-                    $height = $calcHeight;
-                } else {
-                    $width  = $calcWidth;
-                }
-            } else {
-
-                if ($calcWidth < $width) {
-                    $width  = $calcWidth;
-                } else {
-                    $height = $calcHeight;
-                }
-            }
+        if ($keepRatio && $this->isLandscape()) {
+            list($width, $height) = $this->calculateLandscapeWidthHeightWithSameRatio($width, $height);
+        } elseif ($keepRatio) {
+            list($width, $height) = $this->calculatePortraitWidthHeightWithSameRatio($width, $height);
         }
 
         //~ Create new resource
         $image = imagecreatetruecolor($width, $height);
+        if ($this->type === IMAGETYPE_PNG) {
+            imagesavealpha($image, true);
+            imagealphablending($image, false);
+        }
 
         if (!is_resource($image)) {
             throw new Exception\ImageException(__METHOD__ . '|Unable to create new resource image !');
@@ -605,5 +593,43 @@ class Image
 
         //~ Create new imagegd with the final image file
         return new Image($filePathnameNew);
+    }
+
+    /**
+     * @param  int $width
+     * @param  int $height
+     * @return int[]
+     */
+    private function calculateLandscapeWidthHeightWithSameRatio($width, $height)
+    {
+        $calcHeight = $this->height / ($this->width / $width);
+        $calcWidth  = $this->width / ($this->height / $height);
+
+        if ($calcHeight >= $height) {
+            $width = $calcWidth;
+        } else {
+            $height = $calcHeight;
+        }
+
+        return [$width, $height];
+    }
+
+    /**
+     * @param  int $width
+     * @param  int $height
+     * @return int[]
+     */
+    private function calculatePortraitWidthHeightWithSameRatio($width, $height)
+    {
+        $calcHeight = $this->height / ($this->width / $width);
+        $calcWidth  = $this->width / ($this->height / $height);
+
+        if ($calcWidth < $width) {
+            $width = $calcWidth;
+        } else {
+            $height = $calcHeight;
+        }
+
+        return [$width, $height];
     }
 }
